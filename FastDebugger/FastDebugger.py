@@ -45,7 +45,6 @@ class FD_Variable:
 
         self.variable_type, self.variable = [add_color(x) for x in (self.variable_type, self.variable)]
 
-
     def get_type_and_variable(self):
         return self.variable_type, self.variable
 
