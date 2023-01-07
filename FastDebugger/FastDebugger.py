@@ -1,10 +1,11 @@
 import traceback
 
-from py_basic_commands  import fprint
+from py_basic_commands  import fprint, try_traceback
 from dataclasses    import dataclass
 from datetime   import datetime
 from colored    import fg, attr
 from typing     import Any
+
 
 @dataclass
 class FD_Variable:
@@ -53,10 +54,6 @@ class FD_Variable:
 
 
 class FastDebugger:
-    def __init__(self) -> None:
-        self.array_types = ('list', 'ndarray', 'tuple', 'set')
-
-
     def find_fd_brackets(self, code:str) -> Any:
         fd_indxs = []
         for char_indx, char in enumerate(code):
@@ -77,11 +74,22 @@ class FastDebugger:
         print(f'fd | {time_now}')
         return True
     
+
+    @try_traceback()
     def __call__(self, *args:Any, nl:bool=False):
+        def add_center(var_in:Any, center_amnt:int=3):
+            return str(var_in).center(center_amnt)
+        
+        def get_prefix(indx:int, arr:Any):
+            if indx == len(arr)-1:
+                return ' ╚'
+            else:
+                return ' ╟' 
+
         if self.is_args_empty(args):
             return
 
-        filename, lineno, function_name, code = traceback.extract_stack()[-2]
+        filename, lineno, function_name, code = traceback.extract_stack()[-3]
 
         if ';' in code:
             code_split = code.split(';')
@@ -96,16 +104,17 @@ class FastDebugger:
         for var_indx, args_variable in enumerate(args):
             args_variable_type:str = args_variable.__class__.__name__
 
-            if args_variable_type in self.array_types:
-                print(f'fd | {args_variable_type} | {str(len(args_variable)).center(3)} | {var_lst[var_indx]}:')
+            if args_variable_type in ('list', 'ndarray', 'tuple', 'set'):
+                print(f'fd | {add_center(args_variable_type, 5)} | {add_center(len(args_variable))} | {var_lst[var_indx]}')
                 for array_indx, array_variable in enumerate(args_variable):
                     arr_variable_type, variable = FD_Variable(array_variable).get_type_and_variable()
-                    print(f'{" "*3}|{arr_variable_type} | {str(array_indx).center(3)} | {variable}')
+                    print(f'{get_prefix(array_indx, args_variable)} | {arr_variable_type} | {add_center(array_indx)} | {variable}')
 
             elif args_variable_type == 'dict':
+                print(f'fd | {add_center(args_variable_type, 5)} | {add_center(len(args_variable))} | {var_lst[var_indx]}')
                 for dict_indx, (dict_key, dict_variable) in enumerate(args_variable.items()):
-                    dict_variable_type, dict_variable = FD_Variable(dict_variable).get_type_and_variable()
-                    print(f'{" "*3}|{dict_variable_type} | {str(dict_indx).center(3)} | {dict_key}: {dict_variable}')
+                    dict_variable_type, dict_variable = FD_Variable(dict_variable).get_type_and_variable()                    
+                    print(f'{get_prefix(dict_indx, args_variable)} | {dict_variable_type} | {add_center(dict_indx)} | {dict_key}: {dict_variable}')
 
             else:
                 variable_type, variable = FD_Variable(args_variable).get_type_and_variable()
