@@ -8,7 +8,7 @@ from typing     import Any
 
 @dataclass
 class FD_Variable:
-    variable: Any
+    variable:Any
     use_center:bool = True
     center_amnt:int = 5
 
@@ -28,6 +28,8 @@ class FD_Variable:
                 return 'blue'
             case 'str':
                 self.variable = f'{self.variable!r}'
+            case 'list' | 'ndarray' | 'tuple' | 'dict' | 'set':
+                return 'cornsilk_1'
 
     def format_variables(self):
         def add_center(var_in):
@@ -52,7 +54,7 @@ class FD_Variable:
 
 class FastDebugger:
     def __init__(self) -> None:
-        self.array_types = ('list', 'numpy.array', 'tuple', 'dict')
+        self.array_types = ('list', 'ndarray', 'tuple', 'set')
 
 
     def find_fd_brackets(self, code:str) -> Any:
@@ -99,6 +101,11 @@ class FastDebugger:
                 for array_indx, array_variable in enumerate(args_variable):
                     arr_variable_type, variable = FD_Variable(array_variable).get_type_and_variable()
                     print(f'{" "*3}|{arr_variable_type} | {str(array_indx).center(3)} | {variable}')
+
+            elif args_variable_type == 'dict':
+                for dict_indx, (dict_key, dict_variable) in enumerate(args_variable.items()):
+                    dict_variable_type, dict_variable = FD_Variable(dict_variable).get_type_and_variable()
+                    print(f'{" "*3}|{dict_variable_type} | {str(dict_indx).center(3)} | {dict_key}: {dict_variable}')
 
             else:
                 variable_type, variable = FD_Variable(args_variable).get_type_and_variable()
