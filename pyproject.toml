@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "py_basic_commands"
+name = "FastDebugger"
 version = "0.0.1"
 authors = [
   { name="Rasmus Ohert", email="rassemichael@gmail.com" },
