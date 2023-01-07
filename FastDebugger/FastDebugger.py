@@ -1,3 +1,8 @@
+from icecream   import ic
+
+# from FastDebugger   import fd
+import numpy as np
+
 import traceback
 
 from py_basic_commands  import fprint, try_traceback
@@ -5,7 +10,6 @@ from dataclasses    import dataclass
 from datetime   import datetime
 from colored    import fg, attr
 from typing     import Any
-
 
 @dataclass
 class FD_Variable:
@@ -52,7 +56,6 @@ class FD_Variable:
         return self.variable_type, self.variable
 
 
-
 class FastDebugger:
     def find_fd_brackets(self, code:str) -> Any:
         fd_indxs = []
@@ -87,6 +90,7 @@ class FastDebugger:
                 return ' ╟' 
 
         if self.is_args_empty(args):
+
             return
 
         filename, lineno, function_name, code = traceback.extract_stack()[-3]
@@ -118,7 +122,9 @@ class FastDebugger:
 
             else:
                 variable_type, variable = FD_Variable(args_variable).get_type_and_variable()
-                fprint(f'fd | {variable_type} | {var_lst[var_indx]}: {variable}', nl=nl)
+                print(f'fd | {variable_type} | {var_lst[var_indx]}: {variable}')
 
+            if nl:
+                print()
 
 fd = FastDebugger()
