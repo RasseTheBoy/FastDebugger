@@ -132,3 +132,5 @@ class FastDebugger:
 
             if nl:
                 print()
+
+fd = FastDebugger()

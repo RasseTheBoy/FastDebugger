@@ -11,6 +11,8 @@ FastDebugger is a debugging tool for Python that allows users to quickly and eas
 
 - [Author](#author)
 - [Installation](#installation)
+- [Call variables](#call-variables)
+    - [Examples](#examples)
 - [How to use](#how-to-use)
     - [Basic example](#basic-example)
     - [Lists, sets, tuples and dictionarys](#lists-sets-tuples-and-dictionarys)
@@ -20,8 +22,6 @@ FastDebugger is a debugging tool for Python that allows users to quickly and eas
 
 - [@RasseTheBoy](https://github.com/RasseTheBoy)
 
-
-
 # Installation
 
 Install using pip
@@ -30,6 +30,47 @@ Install using pip
   pip install FastDebugger
 
   pip3 install FastDebugger
+```
+
+# Call variables
+
+```py
+fd(*args:Any, nl:bool=True)
+```
+
+The `fd()` call can take in any variables as arguments. It does not matter what type the variables are or how many there are. FastDebugger will print the type and value of each variable passed to it.
+
+The `nl` parameter determines if a newline is printed after the `fd()` call.
+
+## Examples
+
+### Input:
+```py
+from FastDebugger import fd
+
+fd = FastDebugger()
+
+lst = [123, True, 'Hello world!']
+
+fd(lst, nl=True)
+print('Foo')
+fd(lst, nl=False) # Default value of `nl` is False
+print('Foo')
+```
+
+### Output:
+```py
+fd |  list |  3  | lst
+ ╟ |  int  |  0  | 123
+ ╟ |  bool |  1  | True
+ ╚ |  str  |  2  | 'Hello world!'
+
+Foo
+fd |  list |  3  | lst
+ ╟ |  int  |  0  | 123
+ ╟ |  bool |  1  | True
+ ╚ |  str  |  2  | 'Hello world!'
+Foo
 ```
 
 # How to use
