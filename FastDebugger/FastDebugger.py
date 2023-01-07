@@ -1,15 +1,23 @@
-from icecream   import ic
+import inspect, sys, executing
 
-# from FastDebugger   import fd
-import numpy as np
-
-import traceback
-
-from py_basic_commands  import fprint, try_traceback
+from py_basic_commands  import try_traceback
 from dataclasses    import dataclass
 from datetime   import datetime
+from textwrap   import dedent
+from os.path    import basename
 from colored    import fg, attr
 from typing     import Any
+
+
+class Source(executing.Source):
+    def get_text_with_indentation(self, node):
+        result = self.asttokens().get_text(node)
+        if '\n' in result:
+            result = ' ' * node.first_token.start[1] + result
+            result = dedent(result)
+        result = result.strip()
+        return result
+
 
 @dataclass
 class FD_Variable:
@@ -56,21 +64,8 @@ class FD_Variable:
         return self.variable_type, self.variable
 
 
-@dataclass
 class FastDebugger:
-    do_print:bool = True
-
-    def find_fd_brackets(self, code:str) -> Any:
-        fd_indxs = []
-        for char_indx, char in enumerate(code):
-            if code[char_indx-2:char_indx+1] == 'fd(':
-                fd_indxs.append({'start': char_indx+1, 'end': None})
-            elif char == ')':
-                for x in fd_indxs[::-1]:
-                    if not x['end']:
-                        x['end'] = char_indx
-        self.fd_indxs = fd_indxs
-
+    enabled:bool = True
 
     def is_args_empty(self, args):
         if args != ():
@@ -81,8 +76,11 @@ class FastDebugger:
         return True
 
 
-    def cancel_fd(self):
-        self.do_print = False
+    def disable(self):
+        self.enabled = False
+
+    def enable(self):
+        self.enabled = True
     
 
     @try_traceback()
@@ -96,41 +94,50 @@ class FastDebugger:
             else:
                 return ' ╟' 
 
-        if self.is_args_empty(args) or not self.do_print:
+        if self.is_args_empty(args) or not self.enabled:
             return
 
-        filename, lineno, function_name, code = traceback.extract_stack()[-3]
+        callFrame = sys._getframe(2)
+        callNode = Source.executing(callFrame).node
+        args_pairs = self._formatArgs(callFrame, callNode, args)
 
-        if ';' in code:
-            code_split = code.split(';')
-            for func in code_split:
-                if 'fd(' in func:
-                    code = func
-                    continue
-        
-        self.find_fd_brackets(code)
-
-        var_lst = [x.strip() for x in code[self.fd_indxs[0]['start']:self.fd_indxs[0]['end']].split(',')]
-        for var_indx, args_variable in enumerate(args):
-            args_variable_type:str = args_variable.__class__.__name__
-
-            if args_variable_type in ('list', 'ndarray', 'tuple', 'set'):
-                print(f'fd | {add_center(args_variable_type, 5)} | {add_center(len(args_variable))} | {var_lst[var_indx]}')
-                for array_indx, array_variable in enumerate(args_variable):
+        for arg_variable_name, arg_variable_value in args_pairs:
+            arg_variable_type = arg_variable_value.__class__.__name__
+            if arg_variable_type in ('list', 'ndarray', 'tuple', 'set'):
+                print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
+                for array_indx, array_variable in enumerate(arg_variable_value):
                     arr_variable_type, variable = FD_Variable(array_variable).get_type_and_variable()
-                    print(f'{get_prefix(array_indx, args_variable)} | {arr_variable_type} | {add_center(array_indx)} | {variable}')
+                    print(f'{get_prefix(array_indx, arg_variable_value)} | {arr_variable_type} | {add_center(array_indx)} | {variable}')
 
-            elif args_variable_type == 'dict':
-                print(f'fd | {add_center(args_variable_type, 5)} | {add_center(len(args_variable))} | {var_lst[var_indx]}')
-                for dict_indx, (dict_key, dict_variable) in enumerate(args_variable.items()):
+            elif arg_variable_type == 'dict':
+                print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
+                for dict_indx, (dict_key, dict_variable) in enumerate(arg_variable_value.items()):
                     dict_variable_type, dict_variable = FD_Variable(dict_variable).get_type_and_variable()                    
-                    print(f'{get_prefix(dict_indx, args_variable)} | {dict_variable_type} | {add_center(dict_indx)} | {dict_key}: {dict_variable}')
+                    print(f'{get_prefix(dict_indx, arg_variable_value)} | {dict_variable_type} | {add_center(dict_indx)} | {dict_key}: {dict_variable}')
 
             else:
-                variable_type, variable = FD_Variable(args_variable).get_type_and_variable()
-                print(f'fd | {variable_type} | {var_lst[var_indx]}: {variable}')
-
+                variable_type, variable = FD_Variable(arg_variable_value).get_type_and_variable()
+                print(f'fd | {variable_type} | {arg_variable_name}: {variable}')
+            
             if nl:
                 print()
+
+    def _formatArgs(self, callFrame, callNode, args):
+        source = Source.for_frame(callFrame)
+        sanitizedArgStrs = [
+            source.get_text_with_indentation(arg)
+            for arg in callNode.args]
+
+        pairs = list(zip(sanitizedArgStrs, args))
+        
+        return pairs
+
+    def _getContext(self, callFrame, callNode):
+        lineNumber = callNode.lineno
+        frameInfo = inspect.getframeinfo(callFrame)
+        parentFunction = frameInfo.function
+        filename = basename(frameInfo.filename)
+
+        return filename, lineNumber, parentFunction
 
 fd = FastDebugger()
