@@ -56,7 +56,10 @@ class FD_Variable:
         return self.variable_type, self.variable
 
 
+@dataclass
 class FastDebugger:
+    do_print:bool = True
+
     def find_fd_brackets(self, code:str) -> Any:
         fd_indxs = []
         for char_indx, char in enumerate(code):
@@ -76,6 +79,10 @@ class FastDebugger:
         time_now = datetime.now().strftime('%d/%m/%Y - %H:%M:%S')
         print(f'fd | {time_now}')
         return True
+
+
+    def cancel_fd(self):
+        self.do_print = False
     
 
     @try_traceback()
@@ -89,8 +96,7 @@ class FastDebugger:
             else:
                 return ' ╟' 
 
-        if self.is_args_empty(args):
-
+        if self.is_args_empty(args) or not self.do_print:
             return
 
         filename, lineno, function_name, code = traceback.extract_stack()[-3]
@@ -126,5 +132,3 @@ class FastDebugger:
 
             if nl:
                 print()
-
-fd = FastDebugger()
