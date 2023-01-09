@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.3] - 2023-9-1
+
+### Added
+
+- Docstring to `FastDebugger` class and it's `__call__` function
+
 ## [0.0.2] - 2023-7-1
 
 ### Added

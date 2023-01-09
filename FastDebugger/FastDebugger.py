@@ -65,6 +65,23 @@ class FD_Variable:
 
 
 class FastDebugger:
+    """
+    Fast Debugger (`fd`) is a function that allows you to quickly debug and inspect variables.
+
+    - Print out the type, length, and value of variables passed as arguments.
+    - Print out the type, index, and value of elements within a iterable object.
+    - Can be `enabled` or `disabled`. When disabled, will not print anything.
+    - Prints out the current time by default.
+    - Has a `try_traceback` decorator that can be used to catch any exceptions that may occur while using fd.
+    - Use the `nl` parameter to print a newline after each fd print statement.
+
+    Usage:
+    `fd(variable_1, variable_2, ...)`
+
+    Parameters:
+    `*args` (Any): The variables to be inspected.
+    `nl` (bool): Print a newline after each fd print statement.
+    """
     enabled:bool = True
 
     def is_args_empty(self, args):
@@ -83,8 +100,16 @@ class FastDebugger:
         self.enabled = True
     
 
-    @try_traceback()
-    def __call__(self, *args:Any, nl:bool=False):
+    # @try_traceback()
+    def __call__(self, *args:Any, nl:bool=False) -> None:
+        """
+        Executes Fast Debugger functionality.
+
+        Args:
+        `*args`: Any: variable number of arguments to be printed in a formatted way.
+        `nl`: bool: optional parameter to specify if a newline should be printed after the debug statement.
+        """
+
         def add_center(var_in:Any, center_amnt:int=3):
             return str(var_in).center(center_amnt)
         
