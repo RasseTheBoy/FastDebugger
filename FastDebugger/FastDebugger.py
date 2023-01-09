@@ -100,7 +100,7 @@ class FastDebugger:
         self.enabled = True
     
 
-    # @try_traceback()
+    @try_traceback()
     def __call__(self, *args:Any, nl:bool=False) -> None:
         """
         Executes Fast Debugger functionality.
