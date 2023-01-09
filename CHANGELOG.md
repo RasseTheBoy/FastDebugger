@@ -1,5 +1,10 @@
 # Changelog
 
+### Changed
+
+- `__call__`
+    - Uncommented the `try_traceback` decorator
+
 ## [0.0.3] - 2023-9-1
 
 ### Added
