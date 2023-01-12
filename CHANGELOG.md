@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.32] - 2023
+
+### Added
+
+- New input variable for `__call__`
+    - `nl_end: bool`
+    - default: `True`
+    - Prints a new line at the end of the debug print
+
 ## [0.0.31] - 2023-1-9
 
 ### Changed

@@ -101,7 +101,7 @@ class FastDebugger:
     
 
     @try_traceback()
-    def __call__(self, *args:Any, nl:bool=False) -> None:
+    def __call__(self, *args:Any, nl:bool=False, nl_end:bool=True) -> None:
         """
         Executes Fast Debugger functionality.
 
@@ -146,6 +146,8 @@ class FastDebugger:
             
             if nl:
                 print()
+        if nl_end:
+            print()
 
     def _formatArgs(self, callFrame, callNode, args):
         source = Source.for_frame(callFrame)
