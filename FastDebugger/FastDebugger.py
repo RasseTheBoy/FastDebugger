@@ -82,7 +82,10 @@ class FastDebugger:
     `*args` (Any): The variables to be inspected.
     `nl` (bool): Print a newline after each fd print statement.
     """
-    enabled:bool = True
+    
+    def __init__(self) -> None:
+        self.enabled:bool = True
+        self.end_nl:bool = True
 
     def is_args_empty(self, args):
         if args != ():
@@ -98,10 +101,17 @@ class FastDebugger:
 
     def enable(self):
         self.enabled = True
+
+    def config(self, **kwargs):
+        if 'end_nl' in kwargs:
+            self.end_nl = kwargs['end_nl']
+        
+        if 'enabled' in kwargs:
+            self.enabled = kwargs['enabled']
     
 
     @try_traceback()
-    def __call__(self, *args:Any, nl:bool=False, nl_end:bool=True) -> None:
+    def __call__(self, *args:Any, nl:bool=False, end_nl:bool=None) -> None:
         """
         Executes Fast Debugger functionality.
 
@@ -146,7 +156,7 @@ class FastDebugger:
             
             if nl:
                 print()
-        if nl_end:
+        if (end_nl == None and self.end_nl) or end_nl:
             print()
 
     def _formatArgs(self, callFrame, callNode, args):

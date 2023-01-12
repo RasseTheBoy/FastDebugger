@@ -8,6 +8,8 @@
     - `nl_end: bool`
     - default: `True`
     - Prints a new line at the end of the debug print
+- New function: `config()`
+    - Can configure some settings by giving the right input variables to a **kwars
 
 ## [0.0.31] - 2023-1-9
 
