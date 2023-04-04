@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.32] - 2023
+## [0.0.40] - 2023-4-4
 
 ### Added
 
@@ -9,7 +9,21 @@
     - default: `True`
     - Prints a new line at the end of the debug print
 - New function: `config()`
-    - Can configure some settings by giving the right input variables to a **kwars
+    - Can configure some settings by giving the right input variables to a `**kwargs` (e.g. `fd.config(nl_end=False)`)
+- New class `try_traceback`
+    - Removed import statement `from py_basic_commands import try_traceback` and added as a class instead
+    - Now you don't need install `py_basic_commands` to use `FastDebugger`
+- Docstrings added to all functions and classes in `fast_debugger.py`
+- Test code added to `fast_debugger.py`
+    - Can be run by running `python fast_debugger.py` in the terminal
+
+### Changed
+
+- Main file renamed `FastDebugger.py` to `fast_debugger.py`
+    - Importing still works the same way: `from FastDebugger import fd`
+- Fixed` __init__.py` file
+    - Now it imports `fast_debugger.py` instead of `FastDebugger.py`
+    - And instead of importing the file `FastDebugger`, it imports the variable `fd`
 
 ## [0.0.31] - 2023-1-9
 

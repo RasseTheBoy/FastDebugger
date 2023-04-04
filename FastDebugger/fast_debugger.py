@@ -1,7 +1,8 @@
 import inspect, sys, executing
 
-from py_basic_commands  import try_traceback
 from dataclasses    import dataclass
+from functools      import wraps
+from traceback  import format_exc
 from datetime   import datetime
 from textwrap   import dedent
 from os.path    import basename
@@ -9,8 +10,33 @@ from colored    import fg, attr
 from typing     import Any
 
 
+def try_traceback(print_traceback=False):
+    """Decorator to catch and handle exceptions raised by a function.
+    
+    Parameters:
+    - `print_traceback` (bool): Whether to skip printing the traceback information.
+    
+    Returns:
+    - `function`: The decorated function.
+    """
+
+    def try_except(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except:
+                if print_traceback:
+                    print(f'{format_exc()}\n')
+                return None
+        return wrapper
+    return try_except
+
+
 class Source(executing.Source):
+    """Class to get the source code of a function or method."""
     def get_text_with_indentation(self, node):
+        """Get the source code of a node, including indentation."""
         result = self.asttokens().get_text(node)
         if '\n' in result:
             result = ' ' * node.first_token.start[1] + result
@@ -21,6 +47,8 @@ class Source(executing.Source):
 
 @dataclass
 class FD_Variable:
+    """Class to store and format variables for Fast Debugger."""
+
     variable:Any
     use_center:bool = True
     center_amnt:int = 5
@@ -65,8 +93,7 @@ class FD_Variable:
 
 
 class FastDebugger:
-    """
-    Fast Debugger (`fd`) is a function that allows you to quickly debug and inspect variables.
+    """Fast Debugger (`fd`) is a function that allows you to quickly debug and inspect variables.
 
     - Print out the type, length, and value of variables passed as arguments.
     - Print out the type, index, and value of elements within a iterable object.
@@ -88,6 +115,7 @@ class FastDebugger:
         self.end_nl:bool = True
 
     def is_args_empty(self, args):
+        """Checks if `args` is empty."""
         if args != ():
             return False
         
@@ -95,19 +123,21 @@ class FastDebugger:
         print(f'fd | {time_now}')
         return True
 
-
     def disable(self):
+        """Disables Fast Debugger."""
         self.enabled = False
 
     def enable(self):
+        """Enables Fast Debugger."""
         self.enabled = True
 
     def config(self, **kwargs):
-        if 'end_nl' in kwargs:
-            self.end_nl = kwargs['end_nl']
-        
-        if 'enabled' in kwargs:
-            self.enabled = kwargs['enabled']
+        """Configures Fast Debugger."""
+        for key, value in kwargs.items():
+            if key == 'end_nl':
+                self.end_nl = value
+            elif key == 'enabled':
+                self.enabled = value
     
 
     @try_traceback()
@@ -116,8 +146,9 @@ class FastDebugger:
         Executes Fast Debugger functionality.
 
         Args:
-        `*args`: Any: variable number of arguments to be printed in a formatted way.
-        `nl`: bool: optional parameter to specify if a newline should be printed after the debug statement.
+        `*args` (Any): variable number of arguments to be printed in a formatted way.
+        `nl` (bool): optional parameter to specify if a newline should be printed after the debug statement. Defaults to `False`.
+        `end_nl` (bool): optional parameter to specify if a newline should be printed after the debug statement. Defaults to `None`.
         """
 
         def add_center(var_in:Any, center_amnt:int=3):
@@ -160,6 +191,7 @@ class FastDebugger:
             print()
 
     def _formatArgs(self, callFrame, callNode, args):
+        """Formats the arguments passed to `fd`"""
         source = Source.for_frame(callFrame)
         sanitizedArgStrs = [
             source.get_text_with_indentation(arg)
@@ -170,6 +202,7 @@ class FastDebugger:
         return pairs
 
     def _getContext(self, callFrame, callNode):
+        """Gets the context of the call to `fd`"""
         lineNumber = callNode.lineno
         frameInfo = inspect.getframeinfo(callFrame)
         parentFunction = frameInfo.function
@@ -178,3 +211,18 @@ class FastDebugger:
         return filename, lineNumber, parentFunction
 
 fd = FastDebugger()
+
+
+if __name__ == '__main__':
+    # Test fd
+    a = [1, 2, 3, 4, 5]
+    b = {'a': 1, 'b': 2, 'c': 3}
+    c = 'Hello World'
+    d = 123
+    e = 123.456
+    f = True
+    g = None
+
+    tst = [a, b, c, d, e, f, g]
+
+    fd(tst)
