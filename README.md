@@ -7,6 +7,11 @@ FastDebugger
 
 FastDebugger is a debugging tool for Python that allows users to quickly and easily print the values of variables in their code. To use FastDebugger, users simply call the `fd()` function and pass it the variables they want to print. FastDebugger will then print the variable name, value and [other useful information](#how-to-use). This can be helpful for quickly checking the values of variables and troubleshooting code.
 
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/RasseTheBoy/FastDebugger?style=flat-square)](https://github.com/RasseTheBoy/FastDebugger/releases/latest)
+![Working status](https://img.shields.io/badge/status-working-success?style=flat-square)
+[![Working Python version](https://img.shields.io/badge/Python-%2B3.6-informational?style=flat-square&logo=python)](https://www.python.org/)
+![PyPI - License](https://img.shields.io/pypi/l/FastDebugger?style=flat-square)
+
 # Contents
 
 - [Author](#author)

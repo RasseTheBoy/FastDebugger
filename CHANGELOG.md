@@ -16,6 +16,11 @@
 - Docstrings added to all functions and classes in `fast_debugger.py`
 - Test code added to `fast_debugger.py`
     - Can be run by running `python fast_debugger.py` in the terminal
+- Shields added to [README.md](readme.md)
+    - Latest version
+    - Status
+    - Working Python versions
+    - License
 
 ### Changed
 
