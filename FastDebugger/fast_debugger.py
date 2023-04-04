@@ -25,7 +25,7 @@ def try_traceback(print_traceback=False):
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except:
+            except Exception:
                 if print_traceback:
                     print(f'{format_exc()}\n')
                 return None
