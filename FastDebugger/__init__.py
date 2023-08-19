@@ -1,1 +1,1 @@
-from FastDebugger.fast_debugger import fd
+from FastDebugger.fast_debugger import fd, FastDebugger

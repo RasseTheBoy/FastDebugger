@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.0.41] - 
+
+### Added
+
+- New input variable for `__call__`
+    - `exit: bool`
+    - default: `False`
+    - Exits the program after printing the debug message
+- Updated and added new dostrings to all functions and classes in `fast_debugger.py`
+- You can now import the FastDebugger class, instead of only importing `fd`; shown below
+
+```py
+from FastDebugger import FastDebugger
+
+fd = FastDebugger()
+```
+
+
+### Changed
+
+- The `config()` function handles `**kwargs` differently
+    -  instead of me needing to add a new variable for every new input variable, I can just add the input variable to the `__init__` function and they will automatically be checked in the `config()` function
+- Input parameters removed from the `call()` function, and replaced with `**kwargs`
+    - The available `**kwargs` parameters are found in the `__call__` function docstring
+
 ## [0.0.40] - 2023-4-4
 
 ### Added

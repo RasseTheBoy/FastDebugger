@@ -1,23 +1,27 @@
-import inspect, sys, executing
+import inspect, sys, executing, os
 
 from dataclasses    import dataclass
 from functools      import wraps
-from traceback  import format_exc
-from datetime   import datetime
-from textwrap   import dedent
-from os.path    import basename
-from colored    import fg, attr
-from typing     import Any
+from traceback      import format_exc
+from datetime       import datetime
+from textwrap       import dedent
+from os.path        import basename
+from colored        import fg, attr
+from typing         import Any
 
 
-def try_traceback(print_traceback=False):
+def try_traceback(print_traceback=False) -> Any:
     """Decorator to catch and handle exceptions raised by a function.
     
     Parameters:
-    - `print_traceback` (bool): Whether to skip printing the traceback information.
+    -----------
+    print_traceback : bool, optional
+        Whether to skip printing the traceback information. Default is False.
     
     Returns:
-    - `function`: The decorated function.
+    --------
+    Any
+        The decorated function.
     """
 
     def try_except(func):
@@ -25,7 +29,7 @@ def try_traceback(print_traceback=False):
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except Exception:
+            except:
                 if print_traceback:
                     print(f'{format_exc()}\n')
                 return None
@@ -35,8 +39,18 @@ def try_traceback(print_traceback=False):
 
 class Source(executing.Source):
     """Class to get the source code of a function or method."""
-    def get_text_with_indentation(self, node):
-        """Get the source code of a node, including indentation."""
+    def get_text_with_indentation(self, node) -> str:
+        """Get the source code of a node, including indentation.
+        
+        Parameters:
+        -----------
+        node : ast.AST
+            The node to get the source code of.
+            
+        Returns:
+        --------
+        str
+            The source code of the node, including indentation."""
         result = self.asttokens().get_text(node)
         if '\n' in result:
             result = ' ' * node.first_token.start[1] + result
@@ -59,6 +73,12 @@ class FD_Variable:
         self.format_variables()
 
     def get_color(self):
+        """Returns the color of the variable type.
+        
+        Returns:
+        --------
+        str
+            The color of the variable type."""
         match self.variable_type:
             case 'bool':
                 if self.variable:
@@ -71,13 +91,38 @@ class FD_Variable:
                 self.variable = f'{self.variable!r}'
             case 'list' | 'ndarray' | 'tuple' | 'dict' | 'set':
                 return 'cornsilk_1'
+            case _:
+                raise TypeError(f'Unsupported type: {self.variable_type}')
 
     def format_variables(self):
-        def add_center(var_in):
+        def add_center(var_in) -> Any:
+            """Adds centering to the variable type.
+            
+            Parameters:
+            -----------
+            var_in : Any
+                The variable to add centering to.
+            
+            Returns:
+            --------
+            str
+                The variable with centering added.
+            """
             if self.use_center:
                 return str(var_in).center(self.center_amnt)
 
-        def add_color(var_in):
+        def add_color(var_in) -> str:
+            """Adds color to the variable type and variable.
+            
+            Parameters:
+            -----------
+            var_in : Any
+                The variable to add color to.
+            
+            Returns:
+            --------
+            str
+                The variable with color added."""
             var_in = str(var_in)
             if not self.color:
                 return var_in
@@ -89,9 +134,16 @@ class FD_Variable:
         self.variable_type, self.variable = [add_color(x) for x in (self.variable_type, self.variable)]
 
     def get_type_and_variable(self):
+        """Returns the type and variable of the FD_Variable object.
+        
+        Returns:
+        --------
+        tuple : (str, Any)
+            The type and variable of the FD_Variable object."""
         return self.variable_type, self.variable
 
 
+@dataclass
 class FastDebugger:
     """Fast Debugger (`fd`) is a function that allows you to quickly debug and inspect variables.
 
@@ -103,19 +155,41 @@ class FastDebugger:
     - Use the `nl` parameter to print a newline after each fd print statement.
 
     Usage:
+    ------
     `fd(variable_1, variable_2, ...)`
 
     Parameters:
-    `*args` (Any): The variables to be inspected.
-    `nl` (bool): Print a newline after each fd print statement.
+    -----------
+    *args : Any
+        The variables to be inspected.
+    nl : bool, optional
+        Print a newline after each fd print statement. Default is False.
+    end_nl : bool, optional
+        Print a newline after the fd print statement. Default is None.
+    exit : bool, optional
+        Exit the program after the fd print statement. Default is False.
     """
     
-    def __init__(self) -> None:
-        self.enabled:bool = True
-        self.end_nl:bool = True
+    enabled:bool = True
+    nl:bool = False
+    end_nl:bool = True
+    exit:bool = False
 
     def is_args_empty(self, args):
-        """Checks if `args` is empty."""
+        """Checks if `args` is empty.
+        If args is not empty, returns False.
+        If args is empty, prints the current time and returns True.
+        
+        Parameters:
+        -----------
+        args : Any
+            The variables to be inspected.
+            
+        Returns:
+        --------
+        bool
+            Whether `args` is empty.
+        """
         if args != ():
             return False
         
@@ -132,23 +206,33 @@ class FastDebugger:
         self.enabled = True
 
     def config(self, **kwargs):
-        """Configures Fast Debugger."""
+        """Configures Fast Debugger.
+        
+        Parameters:
+        -----------
+        **kwargs : Any
+            The variables to configure.
+        """
         for key, value in kwargs.items():
-            if key == 'end_nl':
-                self.end_nl = value
-            elif key == 'enabled':
-                self.enabled = value
+            if hasattr(self, key):
+                setattr(self, key, value)
     
 
     @try_traceback()
-    def __call__(self, *args:Any, nl:bool=False, end_nl:bool=None) -> None:
+    def __call__(self, *args:Any, **kwargs) -> None:
         """
         Executes Fast Debugger functionality.
 
-        Args:
-        `*args` (Any): variable number of arguments to be printed in a formatted way.
-        `nl` (bool): optional parameter to specify if a newline should be printed after the debug statement. Defaults to `False`.
-        `end_nl` (bool): optional parameter to specify if a newline should be printed after the debug statement. Defaults to `None`.
+        Parameters:
+        -----------
+        args : Any
+            The variables to be inspected.
+        nl : bool, optional
+            Print a newline after each fd print statement. Default is False.
+        end_nl : bool, optional
+            Print a newline after the fd print statement. Default is None.
+        exit : bool, optional
+            Exit the program after the fd print statement. Default is False.
         """
 
         def add_center(var_in:Any, center_amnt:int=3):
@@ -162,13 +246,21 @@ class FastDebugger:
 
         if self.is_args_empty(args) or not self.enabled:
             return
+        
+        # Check input values
+        nl = kwargs.get('nl', self.nl)
+        end_nl = kwargs.get('end_nl', self.end_nl)
+        exit = kwargs.get('exit', self.exit)
 
+        # Get context
         callFrame = sys._getframe(2)
         callNode = Source.executing(callFrame).node
         args_pairs = self._formatArgs(callFrame, callNode, args)
 
+        # Iterate through args
         for arg_variable_name, arg_variable_value in args_pairs:
             arg_variable_type = arg_variable_value.__class__.__name__
+
             if arg_variable_type in ('list', 'ndarray', 'tuple', 'set'):
                 print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
                 for array_indx, array_variable in enumerate(arg_variable_value):
@@ -187,22 +279,53 @@ class FastDebugger:
             
             if nl:
                 print()
+
         if (end_nl == None and self.end_nl) or end_nl:
             print()
 
-    def _formatArgs(self, callFrame, callNode, args):
-        """Formats the arguments passed to `fd`"""
+        if exit:
+            os._exit(0)
+
+
+    def _formatArgs(self, callFrame, callNode, args) -> list[tuple]:
+        """Formats the arguments passed to `fd`
+        
+        Parameters:
+        -----------
+        callFrame : frame
+            The frame of the call to `fd`
+        callNode : ast.Call
+            The node of the call to `fd`
+        args : Any
+            The arguments passed to `fd`
+        
+        Returns:
+        --------
+        list[tuple]
+            The formatted arguments passed to `fd`
+        """
         source = Source.for_frame(callFrame)
-        sanitizedArgStrs = [
-            source.get_text_with_indentation(arg)
-            for arg in callNode.args]
+        sanitizedArgStrs = [source.get_text_with_indentation(arg) for arg in callNode.args] # type: ignore
 
         pairs = list(zip(sanitizedArgStrs, args))
         
         return pairs
 
+
     def _getContext(self, callFrame, callNode):
-        """Gets the context of the call to `fd`"""
+        """Gets the context of the call to `fd`
+        
+        Parameters:
+        -----------
+        callFrame : frame
+            The frame of the call to `fd`
+        callNode : ast.Call
+            The node of the call to `fd`
+        
+        Returns:
+        --------
+        tuple : (str, int, str)
+            The filename, line number, and parent function of the call to `fd`"""
         lineNumber = callNode.lineno
         frameInfo = inspect.getframeinfo(callFrame)
         parentFunction = frameInfo.function
