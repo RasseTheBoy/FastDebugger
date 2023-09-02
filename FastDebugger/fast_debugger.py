@@ -89,7 +89,7 @@ class FD_Variable:
                 return 'blue'
             case 'str':
                 self.variable = f'{self.variable!r}'
-            case 'list' | 'ndarray' | 'tuple' | 'dict' | 'set':
+            case 'list' | 'ndarray' | 'tuple' | 'dict' | 'set' | 'benedict':
                 return 'cornsilk_1'
             case _:
                 raise TypeError(f'Unsupported type: {self.variable_type}')
