@@ -267,7 +267,7 @@ class FastDebugger:
                     arr_variable_type, variable = FD_Variable(array_variable).get_type_and_variable()
                     print(f'{get_prefix(array_indx, arg_variable_value)} | {arr_variable_type} | {add_center(array_indx)} | {variable}')
 
-            elif arg_variable_type == 'dict':
+            elif arg_variable_type in ('dict', 'benedict'):
                 print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
                 for dict_indx, (dict_key, dict_variable) in enumerate(arg_variable_value.items()):
                     dict_variable_type, dict_variable = FD_Variable(dict_variable).get_type_and_variable()                    

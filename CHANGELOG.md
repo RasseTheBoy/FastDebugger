@@ -4,6 +4,8 @@
 
 ### Added
 
+- Can now read [benedict](https://pypi.org/project/python-benedict/) types
+    - `benedict` is a Python dictionary that can handle nested dictionaries
 - New input variable for `__call__`
     - `exit: bool`
     - default: `False`
