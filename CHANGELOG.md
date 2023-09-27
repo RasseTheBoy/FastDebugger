@@ -1,11 +1,11 @@
 # Changelog
 
-## [0.0.41] - 
+## [0.0.41] - 2023-9-27
 
 ### Added
 
 - Can now read [benedict](https://pypi.org/project/python-benedict/) types
-    - `benedict` is a Python dictionary that can handle nested dictionaries
+    - `benedict` is a dictionary that can handle nested dictionaries
 - New input variable for `__call__`
     - `exit: bool`
     - default: `False`
@@ -19,11 +19,10 @@ from FastDebugger import FastDebugger
 fd = FastDebugger()
 ```
 
-
 ### Changed
 
 - The `config()` function handles `**kwargs` differently
-    -  instead of me needing to add a new variable for every new input variable, I can just add the input variable to the `__init__` function and they will automatically be checked in the `config()` function
+    -  It was badly implemented before, and now it's fixed
 - Input parameters removed from the `call()` function, and replaced with `**kwargs`
     - The available `**kwargs` parameters are found in the `__call__` function docstring
 
