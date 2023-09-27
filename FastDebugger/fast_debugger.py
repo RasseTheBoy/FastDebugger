@@ -13,17 +13,16 @@ from typing         import Any
 def try_traceback(print_traceback=False) -> Any:
     """Decorator to catch and handle exceptions raised by a function.
     
-    Parameters:
-    -----------
+    Parameters
+    ----------
     print_traceback : bool, optional
         Whether to skip printing the traceback information. Default is False.
     
-    Returns:
-    --------
+    Returns
+    -------
     Any
         The decorated function.
     """
-
     def try_except(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -42,13 +41,13 @@ class Source(executing.Source):
     def get_text_with_indentation(self, node) -> str:
         """Get the source code of a node, including indentation.
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         node : ast.AST
             The node to get the source code of.
             
-        Returns:
-        --------
+        Returns
+        -------
         str
             The source code of the node, including indentation."""
         result = self.asttokens().get_text(node)
@@ -75,10 +74,11 @@ class FD_Variable:
     def get_color(self):
         """Returns the color of the variable type.
         
-        Returns:
-        --------
+        Returns
+        -------
         str
-            The color of the variable type."""
+            The color of the variable type.
+        """
         match self.variable_type:
             case 'bool':
                 if self.variable:
@@ -98,13 +98,13 @@ class FD_Variable:
         def add_center(var_in) -> Any:
             """Adds centering to the variable type.
             
-            Parameters:
-            -----------
+            Parameters
+            ----------
             var_in : Any
                 The variable to add centering to.
             
-            Returns:
-            --------
+            Returns
+            -------
             str
                 The variable with centering added.
             """
@@ -114,13 +114,13 @@ class FD_Variable:
         def add_color(var_in) -> str:
             """Adds color to the variable type and variable.
             
-            Parameters:
-            -----------
+            Parameters
+            ----------
             var_in : Any
                 The variable to add color to.
             
-            Returns:
-            --------
+            Returns
+            -------
             str
                 The variable with color added."""
             var_in = str(var_in)
@@ -136,8 +136,8 @@ class FD_Variable:
     def get_type_and_variable(self):
         """Returns the type and variable of the FD_Variable object.
         
-        Returns:
-        --------
+        Returns
+        -------
         tuple : (str, Any)
             The type and variable of the FD_Variable object."""
         return self.variable_type, self.variable
@@ -154,12 +154,12 @@ class FastDebugger:
     - Has a `try_traceback` decorator that can be used to catch any exceptions that may occur while using fd.
     - Use the `nl` parameter to print a newline after each fd print statement.
 
-    Usage:
-    ------
+    Usage
+    -----
     `fd(variable_1, variable_2, ...)`
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     *args : Any
         The variables to be inspected.
     nl : bool, optional
@@ -180,21 +180,18 @@ class FastDebugger:
         If args is not empty, returns False.
         If args is empty, prints the current time and returns True.
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         args : Any
             The variables to be inspected.
             
-        Returns:
-        --------
+        Returns
+        -------
         bool
             Whether `args` is empty.
         """
         if args != ():
             return False
-        
-        time_now = datetime.now().strftime('%d/%m/%Y - %H:%M:%S')
-        print(f'fd | {time_now}')
         return True
 
     def disable(self):
@@ -208,8 +205,8 @@ class FastDebugger:
     def config(self, **kwargs):
         """Configures Fast Debugger.
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         **kwargs : Any
             The variables to configure.
         """
@@ -223,8 +220,8 @@ class FastDebugger:
         """
         Executes Fast Debugger functionality.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         args : Any
             The variables to be inspected.
         nl : bool, optional
@@ -235,54 +232,109 @@ class FastDebugger:
             Exit the program after the fd print statement. Default is False.
         """
 
-        def add_center(var_in:Any, center_amnt:int=3):
+        def check_input(input_value_name:str, self_value:Any) -> Any:
+            """Checks if the input value is in kwargs.
+            
+            Parameters
+            ----------
+            input_value_name : str
+                The name of the input value.
+            
+            Returns
+            -------
+            Any
+                The input value if it is in kwargs, else the self value.
+            """
+            return kwargs.get(input_value_name, self_value)
+
+        def add_center(var_in:Any, center_amnt:int=3) -> str:
+            """Adds centering to the variable type.
+            
+            Parameters
+            ----------
+            var_in : Any
+                The variable to add centering to.
+            
+            Returns
+            -------
+            str
+                The variable with centering added.
+            """
             return str(var_in).center(center_amnt)
         
-        def get_prefix(indx:int, arr:Any):
+        def get_prefix(indx:int, arr:Any) -> str:
+            """Gets the prefix for the variable type.
+            
+            Parameters
+            ----------
+            indx : int
+                The index of the variable.
+            
+            Returns
+            -------
+            str
+                The prefix for the variable type.
+            """
             if indx == len(arr)-1:
                 return ' ╚'
             else:
                 return ' ╟' 
 
-        if self.is_args_empty(args) or not self.enabled:
-            return
-        
-        # Check input values
-        nl = kwargs.get('nl', self.nl)
-        end_nl = kwargs.get('end_nl', self.end_nl)
-        exit = kwargs.get('exit', self.exit)
-
-        # Get context
-        callFrame = sys._getframe(2)
-        callNode = Source.executing(callFrame).node
-        args_pairs = self._formatArgs(callFrame, callNode, args)
-
-        # Iterate through args
-        for arg_variable_name, arg_variable_value in args_pairs:
-            arg_variable_type = arg_variable_value.__class__.__name__
-
-            if arg_variable_type in ('list', 'ndarray', 'tuple', 'set'):
-                print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
-                for array_indx, array_variable in enumerate(arg_variable_value):
-                    arr_variable_type, variable = FD_Variable(array_variable).get_type_and_variable()
-                    print(f'{get_prefix(array_indx, arg_variable_value)} | {arr_variable_type} | {add_center(array_indx)} | {variable}')
-
-            elif arg_variable_type in ('dict', 'benedict'):
-                print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
-                for dict_indx, (dict_key, dict_variable) in enumerate(arg_variable_value.items()):
-                    dict_variable_type, dict_variable = FD_Variable(dict_variable).get_type_and_variable()                    
-                    print(f'{get_prefix(dict_indx, arg_variable_value)} | {dict_variable_type} | {add_center(dict_indx)} | {dict_key}: {dict_variable}')
-
-            else:
-                variable_type, variable = FD_Variable(arg_variable_value).get_type_and_variable()
-                print(f'fd | {variable_type} | {arg_variable_name}: {variable}')
+        def print_args_pairs(args_pairs):
+            """Prints the arguments passed to `fd`.
             
-            if nl:
-                print()
+            Parameters
+            ----------
+            args_pairs : list[tuple]
+                The arguments passed to `fd`.
+            """
+            for arg_variable_name, arg_variable_value in args_pairs:
+                arg_variable_type = arg_variable_value.__class__.__name__
 
+                if arg_variable_type in ('list', 'ndarray', 'tuple', 'set'):
+                    print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
+                    for array_indx, array_variable in enumerate(arg_variable_value):
+                        arr_variable_type, variable = FD_Variable(array_variable).get_type_and_variable()
+                        print(f'{get_prefix(array_indx, arg_variable_value)} | {arr_variable_type} | {add_center(array_indx)} | {variable}')
+
+                elif arg_variable_type in ('dict', 'benedict'):
+                    print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
+                    for dict_indx, (dict_key, dict_variable) in enumerate(arg_variable_value.items()):
+                        dict_variable_type, dict_variable = FD_Variable(dict_variable).get_type_and_variable()                    
+                        print(f'{get_prefix(dict_indx, arg_variable_value)} | {dict_variable_type} | {add_center(dict_indx)} | {dict_key}: {dict_variable}')
+
+                else:
+                    variable_type, variable = FD_Variable(arg_variable_value).get_type_and_variable()
+                    print(f'fd | {variable_type} | {arg_variable_name}: {variable}')
+                
+                if nl:
+                    print()
+
+        # Check input values
+        nl = check_input('nl', self.nl)
+        end_nl = check_input('end_nl', self.end_nl)
+        exit = check_input('exit', self.exit)
+
+        # Check if args is empty or fd is disabled
+        if self.is_args_empty(args) or not self.enabled:
+            # Prints the current time as output
+            time_now = datetime.now().strftime('%d/%m/%Y - %H:%M:%S')
+            print(f'fd | {time_now}')
+        
+        else:
+            # Get context
+            callFrame = sys._getframe(2)
+            callNode = Source.executing(callFrame).node
+            args_pairs = self._formatArgs(callFrame, callNode, args)
+
+            # Print args
+            print_args_pairs(args_pairs)
+
+        # Print extra newline
         if (end_nl == None and self.end_nl) or end_nl:
             print()
 
+        # Exit program if given
         if exit:
             os._exit(0)
 
@@ -290,8 +342,8 @@ class FastDebugger:
     def _formatArgs(self, callFrame, callNode, args) -> list[tuple]:
         """Formats the arguments passed to `fd`
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         callFrame : frame
             The frame of the call to `fd`
         callNode : ast.Call
@@ -299,8 +351,8 @@ class FastDebugger:
         args : Any
             The arguments passed to `fd`
         
-        Returns:
-        --------
+        Returns
+        -------
         list[tuple]
             The formatted arguments passed to `fd`
         """
@@ -315,17 +367,18 @@ class FastDebugger:
     def _getContext(self, callFrame, callNode):
         """Gets the context of the call to `fd`
         
-        Parameters:
-        -----------
+        Parameters
+        ----------
         callFrame : frame
             The frame of the call to `fd`
         callNode : ast.Call
             The node of the call to `fd`
         
-        Returns:
-        --------
+        Returns
+        -------
         tuple : (str, int, str)
-            The filename, line number, and parent function of the call to `fd`"""
+            The filename, line number, and parent function of the call to `fd`
+        """
         lineNumber = callNode.lineno
         frameInfo = inspect.getframeinfo(callFrame)
         parentFunction = frameInfo.function
@@ -333,19 +386,6 @@ class FastDebugger:
 
         return filename, lineNumber, parentFunction
 
+
+
 fd = FastDebugger()
-
-
-if __name__ == '__main__':
-    # Test fd
-    a = [1, 2, 3, 4, 5]
-    b = {'a': 1, 'b': 2, 'c': 3}
-    c = 'Hello World'
-    d = 123
-    e = 123.456
-    f = True
-    g = None
-
-    tst = [a, b, c, d, e, f, g]
-
-    fd(tst)
