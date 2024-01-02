@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.42] - 2023-2-1
+
+### Changed
+- Fixed and issue with not printing for some variable types
+- Fixed and issue with some variable type colors not being correct
+
+
 ## [0.0.41] - 2023-9-27
 
 ### Added

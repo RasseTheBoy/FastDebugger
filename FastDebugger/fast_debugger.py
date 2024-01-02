@@ -92,7 +92,7 @@ class FD_Variable:
             case 'list' | 'ndarray' | 'tuple' | 'dict' | 'set' | 'benedict':
                 return 'cornsilk_1'
             case _:
-                raise TypeError(f'Unsupported type: {self.variable_type}')
+                return 'white'
 
     def format_variables(self):
         def add_center(var_in) -> Any:
@@ -214,54 +214,6 @@ class FastDebugger:
             if hasattr(self, key):
                 setattr(self, key, value)
     
-
-    def _formatArgs(self, callFrame, callNode, args) -> list[tuple]:
-        """Formats the arguments passed to `fd`
-        
-        Parameters
-        ----------
-        callFrame : frame
-            The frame of the call to `fd`
-        callNode : ast.Call
-            The node of the call to `fd`
-        args : Any
-            The arguments passed to `fd`
-        
-        Returns
-        -------
-        list[tuple]
-            The formatted arguments passed to `fd`
-        """
-        source = Source.for_frame(callFrame)
-        sanitizedArgStrs = [source.get_text_with_indentation(arg) for arg in callNode.args] # type: ignore
-
-        pairs = list(zip(sanitizedArgStrs, args))
-        
-        return pairs
-
-
-    def _getContext(self, callFrame, callNode):
-        """Gets the context of the call to `fd`
-        
-        Parameters
-        ----------
-        callFrame : frame
-            The frame of the call to `fd`
-        callNode : ast.Call
-            The node of the call to `fd`
-        
-        Returns
-        -------
-        tuple : (str, int, str)
-            The filename, line number, and parent function of the call to `fd`
-        """
-        lineNumber = callNode.lineno
-        frameInfo = inspect.getframeinfo(callFrame)
-        parentFunction = frameInfo.function
-        filename = basename(frameInfo.filename)
-
-        return filename, lineNumber, parentFunction
-
 
     @try_traceback()
     def __call__(self, *args:Any, **kwargs) -> None:
@@ -386,6 +338,53 @@ class FastDebugger:
         if exit:
             os._exit(0)
 
+
+    def _formatArgs(self, callFrame, callNode, args) -> list[tuple]:
+        """Formats the arguments passed to `fd`
+        
+        Parameters
+        ----------
+        callFrame : frame
+            The frame of the call to `fd`
+        callNode : ast.Call
+            The node of the call to `fd`
+        args : Any
+            The arguments passed to `fd`
+        
+        Returns
+        -------
+        list[tuple]
+            The formatted arguments passed to `fd`
+        """
+        source = Source.for_frame(callFrame)
+        sanitizedArgStrs = [source.get_text_with_indentation(arg) for arg in callNode.args] # type: ignore
+
+        pairs = list(zip(sanitizedArgStrs, args))
+        
+        return pairs
+
+
+    def _getContext(self, callFrame, callNode):
+        """Gets the context of the call to `fd`
+        
+        Parameters
+        ----------
+        callFrame : frame
+            The frame of the call to `fd`
+        callNode : ast.Call
+            The node of the call to `fd`
+        
+        Returns
+        -------
+        tuple : (str, int, str)
+            The filename, line number, and parent function of the call to `fd`
+        """
+        lineNumber = callNode.lineno
+        frameInfo = inspect.getframeinfo(callFrame)
+        parentFunction = frameInfo.function
+        filename = basename(frameInfo.filename)
+
+        return filename, lineNumber, parentFunction
 
 
 
