@@ -1,8 +1,22 @@
 # Changelog
 
+## [0.0.43] - 2023-3-1
+
+### Added
+
+- Required dependencies to `setup.cfg` and `pyproject.toml`
+    - asttokens
+    - executing
+
+### Changed
+
+- Disabled `try_traceback` decorator
+    - You can still use it by uncommenting it in `__call__`
+
 ## [0.0.42] - 2023-2-1
 
 ### Changed
+
 - Fixed and issue with not printing for some variable types
 - Fixed and issue with some variable type colors not being correct
 

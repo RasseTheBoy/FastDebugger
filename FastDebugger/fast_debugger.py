@@ -1,4 +1,5 @@
 import inspect, sys, executing, os
+from types import FrameType
 
 from dataclasses    import dataclass
 from functools      import wraps
@@ -215,7 +216,7 @@ class FastDebugger:
                 setattr(self, key, value)
     
 
-    @try_traceback()
+    # @try_traceback()
     def __call__(self, *args:Any, **kwargs) -> None:
         """
         Executes Fast Debugger functionality.
@@ -232,7 +233,7 @@ class FastDebugger:
             Exit the program after the fd print statement. Default is False.
         """
 
-        def check_input(input_value_name:str, self_value:Any) -> Any:
+        def _check_input(input_value_name:str, self_value:Any) -> Any:
             """Checks if the input value is in kwargs.
             
             Parameters
@@ -247,7 +248,8 @@ class FastDebugger:
             """
             return kwargs.get(input_value_name, self_value)
 
-        def add_center(var_in:Any, center_amnt:int=3) -> str:
+
+        def _add_center(var_in:Any, center_amnt:int=3) -> str:
             """Adds centering to the variable type.
             
             Parameters
@@ -261,8 +263,9 @@ class FastDebugger:
                 The variable with centering added.
             """
             return str(var_in).center(center_amnt)
-        
-        def get_prefix(indx:int, arr:Any) -> str:
+
+
+        def _get_prefix(indx:int, arr:Any) -> str:
             """Gets the prefix for the variable type.
             
             Parameters
@@ -280,7 +283,8 @@ class FastDebugger:
             else:
                 return ' ╟' 
 
-        def print_args_pairs(args_pairs):
+
+        def _print_args_pairs(args_pairs) -> None:
             """Prints the arguments passed to `fd`.
             
             Parameters
@@ -292,16 +296,16 @@ class FastDebugger:
                 arg_variable_type = arg_variable_value.__class__.__name__
 
                 if arg_variable_type in ('list', 'ndarray', 'tuple', 'set'):
-                    print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
+                    print(f'fd | {_add_center(arg_variable_type, 5)} | {_add_center(len(arg_variable_value))} | {arg_variable_name}')
                     for array_indx, array_variable in enumerate(arg_variable_value):
                         arr_variable_type, variable = FD_Variable(array_variable).get_type_and_variable()
-                        print(f'{get_prefix(array_indx, arg_variable_value)} | {arr_variable_type} | {add_center(array_indx)} | {variable}')
+                        print(f'{_get_prefix(array_indx, arg_variable_value)} | {arr_variable_type} | {_add_center(array_indx)} | {variable}')
 
                 elif arg_variable_type in ('dict', 'benedict'):
-                    print(f'fd | {add_center(arg_variable_type, 5)} | {add_center(len(arg_variable_value))} | {arg_variable_name}')
+                    print(f'fd | {_add_center(arg_variable_type, 5)} | {_add_center(len(arg_variable_value))} | {arg_variable_name}')
                     for dict_indx, (dict_key, dict_variable) in enumerate(arg_variable_value.items()):
                         dict_variable_type, dict_variable = FD_Variable(dict_variable).get_type_and_variable()                    
-                        print(f'{get_prefix(dict_indx, arg_variable_value)} | {dict_variable_type} | {add_center(dict_indx)} | {dict_key}: {dict_variable}')
+                        print(f'{_get_prefix(dict_indx, arg_variable_value)} | {dict_variable_type} | {_add_center(dict_indx)} | {dict_key}: {dict_variable}')
 
                 else:
                     variable_type, variable = FD_Variable(arg_variable_value).get_type_and_variable()
@@ -310,10 +314,24 @@ class FastDebugger:
                 if nl:
                     print()
 
+
+        def _try_getting_sys_frame() -> FrameType:
+            """Tries to get the sys frame.
+            
+            Returns
+            -------
+            FrameType
+                The sys frame.
+            """
+            try:
+                return sys._getframe(2)
+            except ValueError:
+                return sys._getframe(1)
+
         # Check input values
-        nl = check_input('nl', self.nl)
-        end_nl = check_input('end_nl', self.end_nl)
-        exit = check_input('exit', self.exit)
+        nl = _check_input('nl', self.nl)
+        end_nl = _check_input('end_nl', self.end_nl)
+        exit = _check_input('exit', self.exit)
 
         # Check if args is empty or fd is disabled
         if self.is_args_empty(args) or not self.enabled:
@@ -323,12 +341,12 @@ class FastDebugger:
         
         else:
             # Get context
-            callFrame = sys._getframe(2)
+            callFrame = _try_getting_sys_frame()
             callNode = Source.executing(callFrame).node
             args_pairs = self._formatArgs(callFrame, callNode, args)
 
             # Print args
-            print_args_pairs(args_pairs)
+            _print_args_pairs(args_pairs)
 
         # Print extra newline
         if end_nl:

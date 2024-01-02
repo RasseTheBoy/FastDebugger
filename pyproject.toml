@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "FastDebugger"
-version = "0.0.42"
+version = "0.0.43"
 authors = [
   { name="Rasmus Ohert", email="rassemichael@gmail.com" },
 ]
@@ -15,7 +15,9 @@ description = "Fast debugger for Python 3"
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
-    "colored"
+    "colored",
+    "asttokens",
+    "executing"
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
